@@ -14,7 +14,7 @@ The 3D graph has 3 axes: x-axis -> BL image; y-axis -> angle; z-axis -> FU image
 The 3D graph/matrix **C** is generated from costs between image features at different orientations. The costs are computed for each feature separately and are weighted by user-specified values.
 A cumulative cost matrix **CC** is then determined through dynamic programming. The minimal cost path through the cumulative cost matrix corresponds to the optimum registration between the BL and FU IVUS pullbacks. 
 
-![Alt Text](doc/registration.png)
+![Alt Text](doc/Registration.png)
 Minimum cost path through cumulative cost matrix
 
 ### Features
@@ -26,7 +26,7 @@ Four features are used to register the pullbacks. These are:
 4. The lumen area 
 
 ### Example costs
-Examples showing when the cost is low (left) and high (right) between two different images are shown below. Here a minimum total cost of 0.4 is found when the FU image is rotated by 130 degrees. 
+Examples showing when the cost is low (top) and high (bottom) between two different images are shown below. Here a minimum total cost of 0.4 is found when the FU image is rotated by 130 degrees. 
 In the second example the minimum cost is 0.92 indicating a poor match between the images.
 
 ![Alt Text](doc/good_example.gif)
