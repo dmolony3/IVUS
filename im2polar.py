@@ -8,8 +8,8 @@ def polar(img, order=5):
     def transform(coords):
         theta = (2.0*np.pi*coords[1])/(img.shape[1] -1.)
         radius = (max_radius*coords[0])/img.shape[0]
-        i = 0.5*img.shape[0] - radius*np.sin(theta) + 250
-        j = radius*np.cos(theta) + 0.5*img.shape[1] + 250
+        i = 0.5*img.shape[0] - radius*np.sin(theta) + img.shape[1] #+ 250
+        j = radius*np.cos(theta) + 0.5*img.shape[1] + img.shape[1] #+ 250
         return i, j
 
     impolar = geometric_transform(img, transform, order=order, mode='nearest', prefilter=True)

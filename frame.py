@@ -1,4 +1,5 @@
 # this class is an IVUS frame, can perform operations such as plaque burden
+import os
 import contour
 import read_xml
 import read_IVUS
@@ -27,7 +28,13 @@ class Frame:
 
     def read_IVUS(self):
         # read IVUS images
-        IVUS = read_IVUS.read(self.path)
+        # guess the file extension based on maximum
+        exts = ['.tif',  '.jpg']
+        files = os.listdir(self.path)
+        tif_files = [file for file in files if file.endswith(exts[0])]
+        jpg_files = [file for file in files if file.endswith(exts[1])]
+        ext_idx = 1 if len(jpg_files) > len(tif_files) else 0
+        IVUS = read_IVUS.read(self.path, exts[ext_idx])
         self.noImages = IVUS.shape[0]
         self.IVUS = IVUS
 
@@ -48,13 +55,15 @@ class Frame:
         self.resolution = float(resolution[0])
 
     def contour(self):
+        # get IVUS image dimensions for finding image centroid
+        image_centroid = [int(self.IVUS.shape[1]//2), int(self.IVUS.shape[2]//2)]
 
         # get contours for all images
         for i in range(0, len(self.xInner)):
             #self.inner[i] = contour.Contour(self.xInner[i], self.yInner[i])
             #self.outer[i] = contour.Contour(self.xOuter[i], self.yOuter[i])
-            self.inner.append(contour.Contour(self.xInner[i], self.yInner[i]))
-            self.outer.append(contour.Contour(self.xOuter[i], self.yOuter[i]))
+            self.inner.append(contour.Contour(self.xInner[i], self.yInner[i], image_centroid))
+            self.outer.append(contour.Contour(self.xOuter[i], self.yOuter[i], image_centroid))
             self.centroid.append(self.inner[i].centroid())
         print('Creating list of contours')
 
@@ -141,6 +150,7 @@ class Frame:
         peri = np.zeros(self.IVUS.shape, dtype=np.int8)
         plaqueMask = np.zeros(self.IVUS.shape, dtype=np.uint8)
         periMask = np.zeros(self.IVUS.shape, dtype=np.uint8)
+        centroid = [self.IVUS.shape[1], self.IVUS.shape[2]]
         # determine the number of images to process based on the minimum max of IVUS and xInner
         no_images = min(self.IVUS.shape[0], len(self.xInner))
         for i in range(0, no_images):
@@ -174,7 +184,7 @@ class Frame:
             vesselMask[vesselMask == - 1] = 1
 
             # create circle to define image boundary
-            circ = circle(IVUS, (250, 250), 250, 1, -1).astype(np.int8)
+            circ = circle(IVUS, (centroid[0], centroid[1]), centroid[0], 1, -1).astype(np.int8)
             circ[circ != 1] = 0
 
             plaqueMask[i, :, :] = vesselMask - lumenMask

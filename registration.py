@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
@@ -18,25 +19,25 @@ import gif_features
 from PIL import Image
 
 # patientname
-pname = 'Atorva16'
+pname = 'my_patient'
 
 # flag indicating whether the perivascular and plaque correlation have already been precomputed (1)
-precompute=1
+precompute=0
 
 # flag indicating whether the registration should be evaluated against manual registration (1)
-evaluate = 1
+evaluate = 0
 
 # start and end frames in format [BL, FU]
-start_idx = [5, 28]
-end_idx = [122, 145]
+start_idx = [1, 2]
+end_idx = [10, 10]
 
 # BL files
-BLpath = '/home/ubuntu/Documents/IVUS_registration/Atorva16_BL'
-BLxmlpath = '/home/ubuntu/Documents/IVUS_registration/Atorva16_BL/Atorva_16_BL_data.xml'
+BLpath = os.path.join(os.getcwd(), 'BL')
+BLxmlpath = os.path.join(os.getcwd(), 'BL/BL_data.xml')
 
 # FU files
-FUpath = '/home/ubuntu/Documents/IVUS_registration/Atorva16_FU'
-FUxmlpath = '/home/ubuntu/Documents/IVUS_registration/Atorva16_FU/Atorva_16_FU_data.xml'
+FUpath = os.path.join(os.getcwd(), 'FU')
+FUxmlpath = os.path.join(os.getcwd(), 'FU/FU_data.xml')
 
 # load images and contours
 BL = frame.Frame(BLpath, BLxmlpath)
@@ -114,7 +115,9 @@ areaCorr = areaCorr/np.max(areaCorr)
 
 
 # plot features for the specified BL and FU images
-plot_features.plot(1 - periCorr, 1 - plaqueCorr, 1 - thickCorr, areaCorr, 38, 61)
+BL_frame = 4
+FU_frame = 5
+plot_features.plot(1 - periCorr, 1 - plaqueCorr, 1 - thickCorr, areaCorr, BL_frame, FU_frame)
 
 # determine global and local cost through dynamic programming
 G, L = cost_matrix.compute(periCorr, plaqueCorr, thickCorr, areaCorr)
@@ -127,7 +130,7 @@ optimum_path = optimum_path.astype(np.int)
 optimum_path[:, 2] = optimum_path[:, 2]*skip
 
 # perform rotation of the FU images and print rotated images to file
-FU_registered = np.zeros([optimum_path.shape[0], 500, 500])
+FU_registered = np.zeros([optimum_path.shape[0], IVUS_images_FU.shape[1], IVUS_images_FU.shape[2]])
 for k in range(optimum_path.shape[0]):
     FU_registered[k, :, :] = imutils.rotate(IVUS_images_FU[optimum_path[k, 1], :, :], -optimum_path[k, 2])
     Image.fromarray(FU_registered[k, :, :].astype(np.uint8)).save(pname + '_' + str(optimum_path[k,1])+'.tif')
@@ -137,5 +140,5 @@ np.savetxt(pname + '_registered.csv', optimum_path, fmt='%d', delimiter=',', hea
 
 # perform evaluation with manual co-registration
 if evaluate == 1:
-    manual_coreg = np.loadtxt('/home/ubuntu/Documents/IVUS_registration/Atorva_16_coregister_circ.txt')
+    manual_coreg = np.loadtxt(os.path.join(os.getcwd(), 'coregister_circ.txt'))
     error_axial, error_circ = evaluate_registration.eval(optimum_path, manual_coreg)

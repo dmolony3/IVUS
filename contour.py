@@ -3,11 +3,11 @@ from scipy.interpolate import interp1d
 
 
 class Contour:
-    def __init__(self, x, y):
+    def __init__(self, x, y, centroid=[250,250]):
         self.x = x
         self.y = y
         self.scale = 1
-        self.center = [250, 250]
+        self.center = centroid
         self.area = 0
         #self.rad = 0
         #self.theta = 0

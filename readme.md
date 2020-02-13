@@ -33,7 +33,7 @@ In the second example the minimum cost is 0.92 indicating a poor match between t
 ![Alt Text](doc/bad_example.gif)
 
 ## Usage
-Users should open registration.py and enter the patient/case name
+**Each IVUS frame must be a .tif/jpg file and contours are required. Files must be named by their frame number beginning from 0 e.g. 10.jpg is the 11th frame of the pullback.** Users should open registration.py and enter the patient/case name
 ```python
 patient_name = 'my_patient'
 ```
@@ -54,10 +54,21 @@ start_idx = [5, 28]
 end_idx = [122, 145]
 ```
 
+After successful completion each registered FU image is rotated to match the corresponding BL image orientation and saved to file. Finally, a file pname_registered.csv is saved to the current directory. The file has the following format  
+*BL frame number, FU frame number, rotation angle*
 
-## Requirements
-The following python libraries are required
-Numpy  
-PIL  
-imutils  
-matplotlib  
+## Demo
+BL and FU images as well as their contours are provided. To run the demo from the downloaded directory run:
+```python
+python registration.py
+```
+
+## Generating XML files
+Format used by Echoplaque. Stores meta-information and contour coordinates. If you have contours of IVUS images, each image needs to be converted into a label mask (see sample mask in docs). Each mask should have the same dimensions as an IVUS image. Pixels in the image corresponding to lumen, plaque, perivascular and background should have values corresponding to 1, 2, 3 and 0 respectively.  To create an XML file for a pullback of 131 frames with a frame resolution of 0.02mm and acquired with a pullback speed of 0.5mm/s run the following  
+```python
+python write_xml.py --dir='path/to/masks' --res=0.02 --frames=131 --speed=0.5
+```
+
+## Installation
+Requires python2  
+pip install -r requirements.txt
